@@ -2,13 +2,49 @@ const { Thought, User } = require('../models');
 
 const thoughtController = {
   // add thought to user
+    // get all pizzas
+    getAllThoughts(req, res) {
+      Thought.find({})
+        .populate({
+          path: 'reactions',
+          select: '-__v'
+        })
+        .select('-__v')
+        .sort({ _id: -1 })
+        .then(dbThoughtData => res.json(dbThoughtData))
+        .catch(err => {
+          console.log(err);
+          res.sendStatus(400);
+        });
+    },
+
+    getThoughtById({ params }, res) {
+      Thought.findOne({ _id: params.thoughtId })
+        .populate({
+          path: 'reactions',
+          select: '-__v'
+        })
+        .select('-__v')
+        .then(dbThoughtData => {
+          if (!dbThoughtData) {
+            res.status(404).json({ message: 'No thought found with this id!' });
+            return;
+          }
+          res.json(dbThoughtData);
+        })
+        .catch(err => {
+          console.log(err);
+          res.status(400).json(err);
+        });
+    },
+
   addThought({ params, body }, res) {
     console.log(params);
-    Comment.create(body)
+    Thought.create(body)
       .then(({ _id }) => {
         return User.findOneAndUpdate(
           { _id: params.userId },
-          { $push: { thought: _id } },
+          { $push: { thoughts: _id } },
           { new: true }
         );
       })
@@ -26,13 +62,13 @@ const thoughtController = {
   // add reaction to thought
   addReaction({ params, body }, res) {
     Thought.findOneAndUpdate(
-      { _id: params.commentId },
-      { $push: { reaction: body } },
+      { _id: params.thoughtId },
+      { $push: { reactions: body } },
       { new: true, runValidators: true }
     )
       .then(dbUserData => {
         if (!dbUserData) {
-          res.status(404).json({ message: 'No user found with this id!' });
+          res.status(404).json({ message: 'No thought found with this id!' });
           return;
         }
         res.json(dbUserData);

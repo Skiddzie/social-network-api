@@ -10,7 +10,8 @@ const ReactionSchema = new Schema(
     },
     reactionBody: {
       type: String,
-      required: true
+      required: true,
+      maxLength: 280
     },
     username: {
       type: String,
@@ -60,6 +61,6 @@ ThoughtSchema.virtual('reactionCount').get(function() {
   return this.reactions.length;
 });
 
-const Thoughts = model('Thoughts', ThoughtSchema);
+const Thought = model('Thought', ThoughtSchema);
 
-module.exports = Thoughts;
+module.exports = Thought;
