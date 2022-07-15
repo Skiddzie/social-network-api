@@ -81,7 +81,8 @@ getUserById({ params }, res) {
   deleteFriend({ params, body }, res) {
     User.findOneAndUpdate(
       { _id: params.id },
-      { $remove: { friends: params.friendId } }
+      { $pull: { friends: params.friendId } },
+      { new: true, runValidators: true }
     )
       .then(dbUserData => {
         if (!dbUserData) {
